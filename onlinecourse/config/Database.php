@@ -4,19 +4,18 @@ class Database {
     private $dbname = "onlinecourse";
     private $username = "root";
     private $password = "";
-    public $conn;
 
     public function connect() {
         try {
-            $this->conn = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
+            $conn = new PDO(
+                "mysql:host=$this->host;dbname=$this->dbname",
                 $this->username,
                 $this->password
             );
-            $this->conn->exec("SET NAMES utf8");
+            $conn->exec("SET NAMES utf8");
+            return $conn;
         } catch (PDOException $e) {
-            die("Connection error: " . $e->getMessage());
+            die("Lỗi: " . $e->getMessage());
         }
-        return $this->conn;
     }
 }

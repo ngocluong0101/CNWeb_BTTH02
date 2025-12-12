@@ -1,67 +1,60 @@
 <?php
-session_start();
-
 class AuthController {
 
     public function loginPage() {
-        include "./views/auth/login.php";
+        include "views/auth/login.php";
+    }
+
+    public function registerPage() {
+        include "views/auth/register.php";
     }
 
     public function login() {
-        require "./config/Database.php";
-        require "./models/User.php";
+        require "config/Database.php";
+        require "models/User.php";
 
         $db = (new Database())->connect();
         $userModel = new User($db);
 
-        $username = $_POST['username'];
-        $password = $_POST['password'];
+        $u = $userModel->findUser($_POST["username"]);
 
-        $data = $userModel->findUser($username);
+        if ($u && password_verify($_POST["password"], $u["password"])) {
+            $_SESSION["user"] = $u;
 
-        if ($data && password_verify($password, $data['password'])) {
-            $_SESSION['user'] = $data;
-
-            // Điều hướng theo role
-            switch ($data['role']) {
-                case 0: header("Location: /student/dashboard.php"); break;
-                case 1: header("Location: /instructor/dashboard.php"); break;
-                case 2: header("Location: /admin/dashboard.php"); break;
-            }
-            exit();
+            if ($u["role"] == 2) header("Location: admin/users");
+            if ($u["role"] == 1) echo "Instructor dashboard (tạo sau)";
+            if ($u["role"] == 0) echo "Student dashboard (tạo sau)";
+            exit;
         }
 
-        $error = "Sai tài khoản hoặc mật khẩu";
-        include "./views/auth/login.php";
-    }
-
-    public function registerPage() {
-        include "./views/auth/register.php";
+        $error = "Sai tài khoản hoặc mật khẩu!";
+        include "views/auth/login.php";
     }
 
     public function register() {
-        require "./config/Database.php";
-        require "./models/User.php";
+        require "config/Database.php";
+        require "models/User.php";
 
         $db = (new Database())->connect();
-        $user = new User($db);
+        $userModel = new User($db);
 
-        $user->username = $_POST['username'];
-        $user->email = $_POST['email'];
-        $user->fullname = $_POST['fullname'];
-        $user->password = $_POST['password'];
-        $user->role = 0;  // mặc định học viên
+        $ok = $userModel->register(
+            $_POST['username'],
+            $_POST['email'],
+            $_POST['password'],
+            $_POST['fullname']
+        );
 
-        if ($user->register()) {
-            header("Location: /login");
+        if ($ok) {
+            header("Location: /cse485/CNWeb_BTTH02/onlinecourse/login");
         } else {
-            $error = "Đăng ký thất bại";
-            include "./views/auth/register.php";
+            $error = "Đăng ký thất bại!";
+            include "views/auth/register.php";
         }
     }
 
     public function logout() {
         session_destroy();
-        header("Location: /login");
+        header("Location: /cse485/CNWeb_BTTH02/onlinecourse/login");
     }
 }
