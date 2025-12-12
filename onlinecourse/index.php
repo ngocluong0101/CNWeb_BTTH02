@@ -1,5 +1,15 @@
 <?php
-session_start();
+// Bật error reporting (TẮT trong production)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Set UTF-8 encoding
+header('Content-Type: text/html; charset=UTF-8');
+
+// Start session nếu chưa có
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $url = isset($_GET['url']) ? $_GET['url'] : '';
 
@@ -66,4 +76,45 @@ switch ($url) {
 
     default:
         echo "<h1>404 NOT FOUND</h1>";
+}
+// Get controller and action
+$controller = $_GET['controller'] ?? 'home';
+$action = $_GET['action'] ?? 'index';  // ✅ FIXED: Thêm dấu $
+
+// Sanitize inputs
+$controller = preg_replace('/[^a-zA-Z0-9]/', '', $controller);
+$action = preg_replace('/[^a-zA-Z0-9]/', '', $action);
+
+// Route to appropriate controller
+try {
+    switch ($controller) {
+        case 'course':
+            require_once __DIR__ . '/controllers/CourseController.php';
+            $c = new CourseController();
+            if (method_exists($c, $action)) {
+                $c->$action();
+            } else {
+                $c->index();
+            }
+            break;
+
+        case 'enrollment':
+            require_once __DIR__ . '/controllers/EnrollmentController.php';
+            $ec = new EnrollmentController();
+            if (method_exists($ec, $action)) {
+                $ec->$action();
+            } else {
+                throw new Exception('Action not found');
+            }
+            break;
+
+        case 'home':
+        default:
+            // Redirect to course list as home page
+            header('Location: index.php?controller=course&action=index');
+            exit;
+    }
+} catch (Exception $e) {
+    error_log('Router error: ' . $e->getMessage());
+    die('Có lỗi xảy ra. Vui lòng thử lại sau.');
 }

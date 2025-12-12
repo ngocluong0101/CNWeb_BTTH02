@@ -1,7 +1,27 @@
+# Enable URL Rewriting
 RewriteEngine On
 RewriteBase /cse485/CNWeb_BTTH02/onlinecourse/
 
+# Redirect to index.php if file/directory doesn't exist
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-
 RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# Force UTF-8 Encoding
+AddDefaultCharset UTF-8
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Disable Directory Browsing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "^(\.htaccess|\.env|config\.php)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
