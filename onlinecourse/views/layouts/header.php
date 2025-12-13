@@ -10,7 +10,8 @@ if (session_status() === PHP_SESSION_NONE) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' - ' : '' ?>OnlineCourse</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="/CSE485/ThucHanh/CNWeb_BTTH02/onlinecourse/assets/css/style.css">
+
 </head>
 <body>
     <nav class="navbar">

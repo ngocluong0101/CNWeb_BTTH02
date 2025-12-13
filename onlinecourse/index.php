@@ -79,7 +79,7 @@ switch ($url) {
 }
 // Get controller and action
 $controller = $_GET['controller'] ?? 'home';
-$action = $_GET['action'] ?? 'index';  // ✅ FIXED: Thêm dấu $
+$action = $_GET['action'] ?? 'index';  // 
 
 // Sanitize inputs
 $controller = preg_replace('/[^a-zA-Z0-9]/', '', $controller);
