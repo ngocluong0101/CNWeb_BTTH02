@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 class AuthController {
 
     public function loginPage() {
@@ -21,9 +23,13 @@ class AuthController {
         if ($u && password_verify($_POST["password"], $u["password"])) {
             $_SESSION["user"] = $u;
 
-            if ($u["role"] == 2) header("Location: admin/users");
-            if ($u["role"] == 1) echo "Instructor dashboard (tạo sau)";
-            if ($u["role"] == 0) echo "Student dashboard (tạo sau)";
+            if ($u["role"] == 2)
+                header("Location: /cse485/CNWeb_BTTH02/onlinecourse/admin/users");
+            elseif ($u["role"] == 1)
+                echo "Instructor dashboard (tạo sau)";
+            else
+                echo "Student dashboard (tạo sau)";
+
             exit;
         }
 
