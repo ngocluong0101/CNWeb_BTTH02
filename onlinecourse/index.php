@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 $url = isset($_GET['url']) ? $_GET['url'] : '';
 
@@ -38,13 +39,30 @@ switch ($url) {
         (new AuthController())->logout();
         break;
 
-    // ===== ADMIN – QUẢN LÝ USER =====
+    // ===== ADMIN =====
+    case "admin":
+        requireRole(2);
+        require "controllers/AdminController.php";
+        (new AdminController())->dashboard();
+        break;
+
     case "admin/users":
         requireRole(2);
         require "controllers/AdminController.php";
         (new AdminController())->users();
         break;
 
+    case "admin/users/status":
+        requireRole(2);
+        require "controllers/AdminController.php";
+        (new AdminController())->updateUserStatus();
+        break;
+
+    case "admin/users/role":
+        requireRole(2);
+        require "controllers/AdminController.php";
+        (new AdminController())->updateUserRole();
+        break;
 
     default:
         echo "<h1>404 NOT FOUND</h1>";

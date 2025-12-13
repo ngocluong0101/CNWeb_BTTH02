@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 class AuthController {
 
     public function loginPage() {
@@ -12,6 +10,13 @@ class AuthController {
     }
 
     public function login() {
+
+        // ✅ CHỐNG LỖI: truy cập trực tiếp /auth/login hoặc chưa submit form
+        if (!isset($_POST['username'], $_POST['password'])) {
+            header("Location: /cse485/CNWeb_BTTH02/onlinecourse/login");
+            exit;
+        }
+
         require "config/Database.php";
         require "models/User.php";
 
@@ -38,6 +43,13 @@ class AuthController {
     }
 
     public function register() {
+
+        // (không bắt buộc, nhưng thêm thì rất sạch)
+        if (!isset($_POST['username'], $_POST['email'], $_POST['password'], $_POST['fullname'])) {
+            header("Location: /cse485/CNWeb_BTTH02/onlinecourse/register");
+            exit;
+        }
+
         require "config/Database.php";
         require "models/User.php";
 
