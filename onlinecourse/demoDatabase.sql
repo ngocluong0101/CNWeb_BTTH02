@@ -136,3 +136,6 @@ VALUES
 (1, 4, 'active', 0),    -- student2 học PHP
 (2, 3, 'completed', 100), -- student1 học ML
 (3, 4, 'active', 10);    -- student2 học Android
+
+
+ALTER TABLE users ADD status TINYINT DEFAULT 1;
