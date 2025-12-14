@@ -132,11 +132,12 @@ class Course
     public function getByInstructor($instructorId)
     {
         $stmt = $this->conn->prepare(
-            "SELECT * FROM courses WHERE instructor_id = ? ORDER BY created_at DESC"
+            "SELECT * FROM courses WHERE instructor_id = ?"
         );
         $stmt->execute([$instructorId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function find($id)
     {
