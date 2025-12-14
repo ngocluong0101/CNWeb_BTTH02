@@ -31,10 +31,9 @@ class AuthController {
             if ($u["role"] == 2)
                 header("Location: /cse485/CNWeb_BTTH02/onlinecourse/admin/users");
             elseif ($u["role"] == 1)
-                echo "Instructor dashboard (tạo sau)";
+                header("Location: index.php?controller=course&action=index");
             else
-                echo "Student dashboard (tạo sau)";
-
+                header("Location: index.php?controller=course&action=index");
             exit;
         }
 

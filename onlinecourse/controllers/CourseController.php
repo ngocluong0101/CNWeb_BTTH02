@@ -1,4 +1,7 @@
+
 <?php
+
+
 require_once __DIR__ . '/../models/Course.php';
 require_once __DIR__ . '/../models/Category.php';
 
@@ -8,8 +11,10 @@ class CourseController
 
     public function __construct()
     {
-        $this->startSession();
+        // session đã được start ở index.php
     }
+
+    /* ===================== PUBLIC – STUDENT / INSTRUCTOR ===================== */
 
     public function index()
     {
@@ -20,33 +25,30 @@ class CourseController
     }
 
     public function search()
-{
-    $keyword = $this->sanitizeKeyword($_GET['keyword'] ?? '');
-    
-    // SỬA ĐÂY: Chuyển empty string thành null
-    $categoryInput = $_GET['category'] ?? '';
-    $category = (!empty($categoryInput) && $categoryInput !== '') ? (int)$categoryInput : null;
+    {
+        $keyword = $this->sanitizeKeyword($_GET['keyword'] ?? '');
 
-    // Validate category exists
-    if ($category && !Category::exists($category)) {
-        $this->setFlash('error', 'Danh mục không hợp lệ');
-        $this->redirect('course', 'index');
+        $categoryInput = $_GET['category'] ?? '';
+        $category = (!empty($categoryInput)) ? (int)$categoryInput : null;
+
+        if ($category && !Category::exists($category)) {
+            $this->setFlash('error', 'Danh mục không hợp lệ');
+            $this->redirect('course', 'index');
+        }
+
+        if (empty($keyword) && $category === null) {
+            $this->redirect('course', 'index');
+        }
+
+        $categories = Category::getAll();
+        $courses = Course::search($keyword, $category);
+
+        require __DIR__ . '/../views/courses/search.php';
     }
 
-    $categories = Category::getAll();
-
-    // Redirect if no search criteria
-    if (empty($keyword) && $category === null) {
-        $this->redirect('course', 'index');
-    }
-
-    $courses = Course::search($keyword, $category);
-
-    require __DIR__ . '/../views/courses/search.php';
-}
     public function detail()
     {
-        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $id = (int)($_GET['id'] ?? 0);
 
         if (!$id) {
             $this->setFlash('error', 'Khóa học không tồn tại');
@@ -63,11 +65,73 @@ class CourseController
         require __DIR__ . '/../views/courses/detail.php';
     }
 
-    // Helper methods
-    private function startSession()
+    /* ===================== INSTRUCTOR ONLY ===================== */
+
+    public function myCourses()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        $this->requireInstructor();
+
+        $instructorId = $_SESSION['user']['id'];
+
+        $courseModel = new Course();
+        $courses = $courseModel->getByInstructor($instructorId);
+
+        require __DIR__ . '/../views/instructor/my_courses.php';
+    }
+
+    public function create()
+    {
+        $this->requireInstructor();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $courseModel = new Course();
+            $courseModel->create([
+                'title' => $_POST['title'],
+                'description' => $_POST['description'],
+                'price' => $_POST['price'],
+                'instructor_id' => $_SESSION['user']['id']
+            ]);
+
+            $this->redirect('course', 'myCourses');
+        }
+
+        require __DIR__ . '/../views/instructor/course/create.php';
+    }
+
+    public function edit()
+    {
+        $this->requireInstructor();
+
+        $id = (int)($_GET['id'] ?? 0);
+        $courseModel = new Course();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $courseModel->update($id, $_POST);
+            $this->redirect('course', 'myCourses');
+        }
+
+        $course = $courseModel->find($id);
+        require __DIR__ . '/../views/instructor/course/edit.php';
+    }
+
+    public function delete()
+    {
+        $this->requireInstructor();
+
+        $id = (int)($_GET['id'] ?? 0);
+        $courseModel = new Course();
+        $courseModel->delete($id);
+
+        $this->redirect('course', 'myCourses');
+    }
+
+    /* ===================== HELPERS ===================== */
+
+    private function requireInstructor()
+    {
+        if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 1) {
+            header("Location: index.php?controller=course&action=index");
+            exit;
         }
     }
 
@@ -86,61 +150,11 @@ class CourseController
     {
         $keyword = trim($keyword);
         $keyword = preg_replace('/\s+/u', ' ', $keyword);
-        
-        if (strlen($keyword) > self::MAX_KEYWORD_LENGTH) {
+
+        if (mb_strlen($keyword, 'UTF-8') > self::MAX_KEYWORD_LENGTH) {
             $keyword = mb_substr($keyword, 0, self::MAX_KEYWORD_LENGTH, 'UTF-8');
         }
-        
+
         return $keyword;
     }
-  
-  public function index() {
-        $this->myCourses();
-    }
-
-    public function myCourses() {
-        // Tương thích với session bạn đang dùng
-        $instructorId = $_SESSION['user_id'];
-
-        $courseModel = new Course();
-       $courses = $courseModel->getAll();
-        require 'views/instructor/my_courses.php';
-    }
-
-    public function create() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $courseModel = new Course();
-            $courseModel->create([
-                'title' => $_POST['title'],
-                'description' => $_POST['description'],
-                'price' => $_POST['price'],
-                'instructor_id' => $_SESSION['user_id']
-            ]);
-            header("Location: index.php?controller=course&action=index");
-            exit();
-        }
-        require 'views/instructor/course/create.php';
-    }
-
-    public function edit() {
-        $courseModel = new Course();
-        $id = $_GET['id'];
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $courseModel->update($id, $_POST);
-            header("Location: index.php?controller=course&action=index");
-            exit();
-        }
-
-        $course = $courseModel->find($id);
-        require 'views/instructor/course/edit.php';
-    }
-
-    public function delete() {
-        $courseModel = new Course();
-        $courseModel->delete($_GET['id']);
-        header("Location: index.php?controller=course&action=index");
-        exit();
-    }
 }
-require_once 'models/Course.php';

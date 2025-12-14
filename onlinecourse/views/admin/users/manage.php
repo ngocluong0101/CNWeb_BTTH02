@@ -76,12 +76,42 @@
         .btn:hover {
             opacity: 0.85;
         }
+
+            .top-bar {
+        width: 90%;
+        margin: 20px auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-logout {
+        background: #34495e;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .btn-logout:hover {
+        background: #2c3e50;
+    }
+
     </style>
 </head>
 
 <body>
 
 <h2>Quản lý tài khoản người dùng</h2>
+<div class="top-bar">
+    <h2>Quản lý tài khoản người dùng</h2>
+
+    <a class="btn-logout"
+       href="/cse485/CNWeb_BTTH02/onlinecourse/logout">
+        Đăng xuất
+    </a>
+</div>
 
 <table>
     <tr>
