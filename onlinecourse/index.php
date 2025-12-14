@@ -1,4 +1,5 @@
 <?php
+
 // Bật error reporting (TẮT trong production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -107,8 +108,51 @@ try {
                 throw new Exception('Action not found');
             }
             break;
+        
+        case 'course':
+        // Kiểm tra file tồn tại trước khi require để tránh lỗi trắng trang
+        if (file_exists('controllers/CourseController.php')) {
+            require_once 'controllers/CourseController.php';
+            $courseController = new CourseController();
+            if (method_exists($courseController, $action)) {
+                $courseController->{$action}();
+            } else {
+                echo "Action '$action' không tồn tại trong CourseController.";
+            }
+        } else {
+            echo "Lỗi: File controllers/CourseController.php chưa được tạo.";
+        }
+        break;
+        
+        case 'lesson':
+        if (file_exists('controllers/LessonController.php')) {
+            require_once 'controllers/LessonController.php';
+            $lessonController = new LessonController();
+            if (method_exists($lessonController, $action)) {
+                $lessonController->{$action}();
+            } else {
+                echo "Action '$action' không tồn tại trong LessonController.";
+            }
+        } else {
+             echo "Lỗi: File controllers/LessonController.php chưa được tạo.";
+        }
+        break;
+        
+        case 'auth':
+        require_once 'controllers/AuthController.php';
+        $authController = new AuthController();
+        if (method_exists($authController, $action)) {
+            $authController->{$action}();
+        } else {
+            echo "Action không tồn tại.";
+        }
+        break;
 
         case 'home':
+        require_once 'controllers/HomeController.php';
+        $homeController = new HomeController();
+        $homeController->index();
+        break;
         default:
             // Redirect to course list as home page
             header('Location: index.php?controller=course&action=index');
@@ -118,3 +162,4 @@ try {
     error_log('Router error: ' . $e->getMessage());
     die('Có lỗi xảy ra. Vui lòng thử lại sau.');
 }
+
